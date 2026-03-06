@@ -41,6 +41,8 @@ body {
 }
 
 .popup-card {
+  background: #ffffff;
+  color: #333333;
   padding: 22px 26px;
   min-width: 420px;
   max-width: 520px;
@@ -52,7 +54,6 @@ body {
   line-height: 1.15;
   margin: 0 36px 12px 0;
   color: #333333;
-
   white-space: normal;
   overflow-wrap: break-word;
 }
@@ -301,13 +302,14 @@ map.on('load', () => {
         </div>
       `;
 
-    new mapboxgl.Popup({
-      offset: 18,
-      maxWidth: "520px"
-    })
-      .setLngLat(coords)
-      .setHTML(popupHtml)
-      .addTo(map);
+      new mapboxgl.Popup({
+        offset: 18,
+        maxWidth: '520px'
+      })
+        .setLngLat(coords)
+        .setHTML(popupHtml)
+        .addTo(map);
+    });
 
     map.on('mouseenter', 'clusters', () => {
       map.getCanvas().style.cursor = 'pointer';
@@ -324,10 +326,9 @@ map.on('load', () => {
     map.on('mouseleave', 'points', () => {
       map.getCanvas().style.cursor = '';
     });
+
   });
 });
 </script>
 </body>
 </html>
-
-
