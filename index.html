@@ -115,7 +115,16 @@ function escapeHtml(str) {
 
 const map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/mapbox/dark-v11',
+  style: 'mapbox://styles/mapbox/standard',
+  config: {
+    basemap: {
+      theme: 'monochrome',
+      lightPreset: 'night',
+      showRoadLabels: false,
+      showPointOfInterestLabels: false,
+      showTransitLabels: false
+    }
+  },
   center: [32.3, 0.3],
   zoom: 5
 });
@@ -332,3 +341,4 @@ map.on('load', () => {
 </script>
 </body>
 </html>
+
