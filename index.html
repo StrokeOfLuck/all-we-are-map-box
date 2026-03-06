@@ -22,6 +22,21 @@ body {
   width: 100%;
 }
 
+#styleToggle {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: #ffffff;
+  color: #222;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
 .mapboxgl-popup {
   max-width: 560px;
 }
@@ -94,6 +109,7 @@ body {
 </head>
 
 <body>
+<button id="styleToggle">Switch to real map</button>
 <div id="map"></div>
 
 <script>
@@ -113,16 +129,22 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+let currentStyle = 'dark';
+
+const styles = {
+  dark: 'mapbox://styles/mapbox/dark-v11',
+  real: 'mapbox://styles/mapbox/satellite-streets-v12'
+};
+
 const map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/mapbox/dark-v11',
+  style: styles.dark,
   center: [32.3, 0.3],
   zoom: 5
 });
 
-map.on('load', () => {
+function addSiteLayers() {
   d3.csv('./Impact_Map_Export%20-%20Sheet1.csv').then(function(data) {
-
     const features = data
       .filter(d =>
         d.longitude &&
@@ -154,6 +176,11 @@ map.on('load', () => {
       type: 'FeatureCollection',
       features: features
     };
+
+    if (map.getLayer('clusters')) map.removeLayer('clusters');
+    if (map.getLayer('cluster-count')) map.removeLayer('cluster-count');
+    if (map.getLayer('points')) map.removeLayer('points');
+    if (map.getSource('sites')) map.removeSource('sites');
 
     map.addSource('sites', {
       type: 'geojson',
@@ -326,11 +353,36 @@ map.on('load', () => {
     map.on('mouseleave', 'points', () => {
       map.getCanvas().style.cursor = '';
     });
+  });
+}
 
+map.on('load', () => {
+  addSiteLayers();
+});
+
+document.getElementById('styleToggle').addEventListener('click', () => {
+  const center = map.getCenter();
+  const zoom = map.getZoom();
+  const bearing = map.getBearing();
+  const pitch = map.getPitch();
+
+  currentStyle = currentStyle === 'dark' ? 'real' : 'dark';
+
+  map.setStyle(styles[currentStyle]);
+
+  document.getElementById('styleToggle').textContent =
+    currentStyle === 'dark' ? 'Switch to real map' : 'Switch to dark map';
+
+  map.once('style.load', () => {
+    map.jumpTo({
+      center,
+      zoom,
+      bearing,
+      pitch
+    });
+    addSiteLayers();
   });
 });
 </script>
 </body>
 </html>
-
-
