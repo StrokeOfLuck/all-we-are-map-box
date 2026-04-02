@@ -445,13 +445,13 @@ function addSiteLayers() {
   
     return {
       type: 'Feature',
-      properties: {
+        properties: {
         Population: parseNumber(bestRow['Population']),
         name: bestRow['Customer Name'] || bestRow['System Name'] || '',
         district: bestRow['District'] || '',
         customerType: bestRow['Customer Type'] || '',
         installDate: bestRow['Install Date'] || '',
-        systemName: bestRow['Customer Name'] || bestRow['System Name'] || '',
+        systemName: bestRow['System Name'] || '',
         designType: bestRow['Design Type'] || '',
         systemNumber: bestSystemNumber
       },
