@@ -374,7 +374,7 @@ function bindMapInteractions() {
         </div>
   
         <div class="popup-details">
-          <div><strong>Customer:</strong> ${escapeHtml(props.name || 'N/A')}</div>
+          <div><strong>Customer:</strong> ${escapeHtml(props.customerLabel || props.name || 'N/A')}</div>
           <div><strong>Number of Systems:</strong> ${escapeHtml(props.systemNumber || 'N/A')}</div>
           <div><strong>Type:</strong> ${escapeHtml(props.customerType || 'N/A')}</div>
           <div><strong>District:</strong> ${escapeHtml(props.district || 'N/A')}</div>
@@ -414,25 +414,27 @@ function addSiteLayers() {
     const features = data
       .filter(d => d.longitude && d.latitude)
       .map(d => {
-        const customerName = (d['Customer Name'] || d['System Name'] || '').trim();
+        const rawSystemName = (d['System Name'] || '').trim();
+        const baseCustomerName = rawSystemName.replace(/\s+#\d+\s*$/, '').trim();
+
         const systemIndex = parseNumber(d['Customer System Number']);
         const totalSystems = parseNumber(d['Customer System Total']);
 
         const displayName =
           totalSystems > 1 && systemIndex > 0
-            ? `${customerName} #${systemIndex}`
-            : customerName;
+            ? `${baseCustomerName} location ${systemIndex}`
+            : baseCustomerName;
 
         return {
           type: 'Feature',
           properties: {
             Population: parseNumber(d['Population']),
             name: displayName,
-            customerName: customerName,
+            customerLabel: displayName,
             district: d['District'] || '',
             customerType: d['Customer Type'] || '',
             installDate: d['Install Date'] || '',
-            systemName: d['System Name'] || '',
+            systemName: rawSystemName,
             designType: d['Design Type'] || '',
             systemNumber: totalSystems,
             systemIndex: systemIndex
