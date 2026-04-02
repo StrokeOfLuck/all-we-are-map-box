@@ -409,7 +409,6 @@ function bindMapInteractions() {
     map.getCanvas().style.cursor = '';
   });
 }
-
 function addSiteLayers() {
   d3.csv('./Impact_Map_Export%20-%20Sheet1.csv').then(function(data) {
     const features = data
@@ -417,9 +416,12 @@ function addSiteLayers() {
       .map(d => {
         const customerName = (d['Customer Name'] || d['System Name'] || '').trim();
         const systemIndex = parseNumber(d['Customer System Number']);
-        const displayName = systemIndex > 0
-          ? `${customerName} #${systemIndex}`
-          : customerName;
+        const totalSystems = parseNumber(d['Customer System Total']);
+
+        const displayName =
+          totalSystems > 1 && systemIndex > 0
+            ? `${customerName} #${systemIndex}`
+            : customerName;
 
         return {
           type: 'Feature',
@@ -432,7 +434,7 @@ function addSiteLayers() {
             installDate: d['Install Date'] || '',
             systemName: d['System Name'] || '',
             designType: d['Design Type'] || '',
-            systemNumber: parseNumber(d['Customer System Total']),
+            systemNumber: totalSystems,
             systemIndex: systemIndex
           },
           geometry: {
