@@ -409,158 +409,27 @@ function bindMapInteractions() {
     map.getCanvas().style.cursor = '';
   });
 }
-
 function addSiteLayers() {
   d3.csv('./Impact_Map_Export%20-%20Sheet1.csv').then(function(data) {
-    const grouped = new Map();
+    const systemsByCustomerId = new Map();
+    const customerInfoById = new Map();
 
-    // Group using ALL rows first
     data.forEach(d => {
-      const lat = parseNumber(d.latitude);
-      const lng = parseNumber(d.longitude);
-      const customerId = String(d['Customer ID'] || '').trim();
-      const key = customerId || `${lat}|${lng}`;
+      const systemCustomerId = String(d['Customer ID'] || '').trim();
+      const customerName = String(d['Customer Name'] || '').trim();
+      const customerType = String(d['Customer Type'] || '').trim();
+      const district = String(d['District'] || '').trim();
+      const installDate = String(d['Install Date'] || '').trim();
 
-      if (!grouped.has(key)) {
-        grouped.set(key, []);
-      }
+      const lat = parseNumber(d['latitude']);
+      const lng = parseNumber(d['longitude']);
+      const hasCoords = d['latitude'] !== undefined && d['longitude'] !== undefined &&
+                        String(d['latitude']).trim() !== '' &&
+                        String(d['longitude']).trim() !== '';
 
-      grouped.get(key).push({
-        raw: d,
-        lat,
-        lng,
-        hasCoords: !!(d.longitude && d.latitude)
-      });
-    });
-
-    const features = Array.from(grouped.values())
-      .map(rows => {
-        // Use Customer System Total from ANY row in the group
-        const bestSystemNumber = Math.max(
-          ...rows.map(r => parseNumber(r.raw['Customer System Total']))
-        );
-
-        // Pick a row with coordinates for the actual map point
-        const mappedRow = rows.find(r => r.hasCoords);
-        if (!mappedRow) return null;
-
-        const bestRow = mappedRow.raw;
-
-        return {
-          type: 'Feature',
-          properties: {
-            Population: parseNumber(bestRow['Population']),
-            district: bestRow['District'] || '',
-            customerType: bestRow['Customer Type'] || '',
-            installDate: bestRow['Install Date'] || '',
-            name: bestRow['Customer Name'] || bestRow['System Name'] || '',
-            systemName: bestRow['Customer Name'] || bestRow['System Name'] || '',
-            systemNumber: bestSystemNumber
-          },
-          geometry: {
-            type: 'Point',
-            coordinates: [mappedRow.lng, mappedRow.lat]
-          }
-        };
-      })
-      .filter(Boolean);
-
-    const geojson = { type: 'FeatureCollection', features };
-
-    populateCustomerDropdown(features);
-
-    if (map.getLayer('cluster-count')) map.removeLayer('cluster-count');
-    if (map.getLayer('clusters')) map.removeLayer('clusters');
-    if (map.getLayer('points')) map.removeLayer('points');
-    if (map.getSource('sites')) map.removeSource('sites');
-
-    map.addSource('sites', {
-      type: 'geojson',
-      data: geojson,
-      cluster: true,
-      clusterRadius: 150,
-      clusterMaxZoom: 13,
-      clusterProperties: {
-        people: ['+', ['get', 'Population']]
-      }
-    });
-
-    map.addLayer({
-      id: 'clusters',
-      type: 'circle',
-      source: 'sites',
-      filter: ['has', 'point_count'],
-      paint: {
-        'circle-color': '#E3BC47',
-        'circle-stroke-color': '#ffffff',
-        'circle-stroke-width': 0,
-        'circle-radius': [
-          'interpolate', ['linear'], ['get', 'people'],
-          0, 18,
-          1000, 26,
-          5000, 36,
-          10000, 46,
-          25000, 60,
-          50000, 76,
-          100000, 92
-        ]
-      }
-    });
-
-    map.addLayer({
-      id: 'cluster-count',
-      type: 'symbol',
-      source: 'sites',
-      filter: ['has', 'point_count'],
-      layout: {
-        'text-field': [
-          'case',
-          ['>=', ['get', 'people'], 1000],
-          [
-            'concat',
-            [
-              'to-string',
-              [
-                'case',
-                ['>=', ['get', 'people'], 10000],
-                ['round', ['/', ['get', 'people'], 1000]],
-                ['/', ['round', ['*', ['/', ['get', 'people'], 1000], 10]], 10]
-              ]
-            ],
-            'k'
-          ],
-          ['to-string', ['round', ['get', 'people']]]
-        ],
-        'text-size': 18,
-        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold']
-      },
-      paint: {
-        'text-color': '#000000'
-      }
-    });
-
-    map.addLayer({
-      id: 'points',
-      type: 'circle',
-      source: 'sites',
-      filter: ['!', ['has', 'point_count']],
-      paint: {
-        'circle-color': '#E3BC47',
-        'circle-radius': [
-          'interpolate', ['linear'], ['get', 'Population'],
-          0, 5,
-          100, 8,
-          300, 12,
-          600, 16,
-          1000, 20
-        ],
-        'circle-stroke-color': '#ffffff',
-        'circle-stroke-width': 2
-      }
-    });
-  });
-}
-
+      const population = parseNumber(d['Population']);
+      const systemName = String(d['System Name'] || '').trim();
+      const systemTotal = parseNumber(d['Customer System Total']);
 map.on('load', () => {
   addSiteLayers();
   bindMapInteractions();
