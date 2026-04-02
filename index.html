@@ -447,11 +447,11 @@ function addSiteLayers() {
       type: 'Feature',
       properties: {
         Population: parseNumber(bestRow['Population']),
-        name: bestRow['System Name'] || bestRow['Customer Name'] || '',
+        name: bestRow['Customer Name'] || bestRow['System Name'] || '',
         district: bestRow['District'] || '',
         customerType: bestRow['Customer Type'] || '',
         installDate: bestRow['Install Date'] || '',
-        systemName: bestRow['System Name'] || '',
+        systemName: bestRow['Customer Name'] || bestRow['System Name'] || '',
         designType: bestRow['Design Type'] || '',
         systemNumber: bestSystemNumber
       },
