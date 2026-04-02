@@ -233,7 +233,7 @@ body {
 <div id="map"></div>
 
 <script>
-mapboxgl.accessToken = 'pk.eyJ1Ijoicy1wZXJrIiwiYSI6ImNtbWU1amJyZDBiNjcyc3E0bmZubXVwdm8ifQ.-II8pwN1aLKbed_BQXf0cA';
+mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN_HERE';
 
 let currentStyle = 'dark';
 let interactionsBound = false;
@@ -251,11 +251,11 @@ function parseNumber(v) {
 
 function escapeHtml(str) {
   return String(str ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 const map = new mapboxgl.Map({
@@ -374,7 +374,7 @@ function bindMapInteractions() {
         </div>
   
         <div class="popup-details">
-          <div><strong>System:</strong> ${escapeHtml(props.systemName || props.designType || 'N/A')}</div>
+          <div><strong>System:</strong> ${escapeHtml(props.systemName || 'N/A')}</div>
           <div><strong>Number of Systems:</strong> ${escapeHtml(props.systemNumber || 'N/A')}</div>
           <div><strong>Type:</strong> ${escapeHtml(props.customerType || 'N/A')}</div>
           <div><strong>District:</strong> ${escapeHtml(props.district || 'N/A')}</div>
@@ -407,8 +407,9 @@ function bindMapInteractions() {
 
   map.on('mouseleave', 'points', () => {
     map.getCanvas().style.cursor = '';
+  });
+}
 
-<script>
 function addSiteLayers() {
   d3.csv('./Impact_Map_Export%20-%20Sheet1.csv').then(function(data) {
     const grouped = new Map();
@@ -585,8 +586,7 @@ function addSiteLayers() {
     });
   });
 }
-</script>
-    
+
 map.on('load', () => {
   addSiteLayers();
   bindMapInteractions();
@@ -609,4 +609,4 @@ document.getElementById('styleToggle').addEventListener('click', () => {
 });
 </script>
 </body>
-</html> 
+</html>
