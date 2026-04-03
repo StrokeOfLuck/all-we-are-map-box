@@ -412,81 +412,56 @@ function bindMapInteractions() {
 
 function addSiteLayers() {
   d3.csv('./Impact_Map_Export%20-%20Sheet1.csv').then(function(data) {
-    const grouped = new Map();
-    const customerNameById = new Map();
-
-    // Build customer-name lookup from the customer-side columns
-    data.forEach(d => {
-      const customerLookupId = String(d['Customer ID.2'] || '').trim();
-      const customerLookupName = String(d['Customer Name'] || '').trim();
-
-      if (customerLookupId && customerLookupName) {
-        customerNameById.set(customerLookupId, customerLookupName);
+  const grouped = new Map();
+  
+  data
+    .filter(d => d.longitude && d.latitude)
+    .forEach(d => {
+      const lat = parseNumber(d.latitude);
+      const lng = parseNumber(d.longitude);
+  
+      const systemNumber = parseNumber(d['Customer System Total']);
+  
+      // Group by Customer ID first when available, otherwise fall back to coordinates
+      const customerId = String(d['Customer ID'] || '').trim();
+      const key = customerId || `${lat}|${lng}`;
+  
+      if (!grouped.has(key)) {
+        grouped.set(key, []);
       }
-    });
-
-    // Keep your working system grouping logic
-    data
-      .filter(d => d.longitude && d.latitude)
-      .forEach(d => {
-        const lat = parseNumber(d.latitude);
-        const lng = parseNumber(d.longitude);
-        const systemNumber = parseNumber(d['Customer System Total']);
-
-        const customerId = String(d['Customer ID'] || '').trim();
-        const key = customerId || `${lat}|${lng}`;
-
-        if (!grouped.has(key)) {
-          grouped.set(key, []);
-        }
-
-        grouped.get(key).push({
-          raw: d,
-          lat,
-          lng,
-          systemNumber
-        });
+  
+      grouped.get(key).push({
+        raw: d,
+        lat,
+        lng,
+        systemNumber
       });
-
-    const features = Array.from(grouped.entries()).map(([groupKey, rows]) => {
-      rows.sort((a, b) => b.systemNumber - a.systemNumber);
-
-      const bestRow = rows[0].raw;
-      const bestSystemNumber = rows[0].systemNumber;
-      const customerId = String(bestRow['Customer ID'] || '').trim();
-
-      const systemName = String(bestRow['System Name'] || '').trim();
-
-      const fallbackCustomerNameFromSystem = systemName
-        .replace(/\s+#\d+\s*$/i, '')
-        .trim();
-
-      const customerName =
-        customerNameById.get(customerId) ||
-        String(bestRow['Customer Name'] || '').trim() ||
-        fallbackCustomerNameFromSystem ||
-        systemName;
-
-      return {
-        type: 'Feature',
-        properties: {
-          customerId,
-          Population: parseNumber(bestRow['Population']),
-          name: customerName,
-          customerName: customerName,
-          district: bestRow['District'] || '',
-          customerType: bestRow['Customer Type'] || '',
-          installDate: bestRow['Install Date'] || '',
-          systemName: systemName,
-          designType: bestRow['Design Type'] || '',
-          systemNumber: bestSystemNumber
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: [rows[0].lng, rows[0].lat]
-        }
-      };
     });
+  
+  const features = Array.from(grouped.values()).map(rows => {
+    rows.sort((a, b) => b.systemNumber - a.systemNumber);
+    const bestRow = rows[0].raw;
+    const bestSystemNumber = rows[0].systemNumber;
+  
+    return {
+      type: 'Feature',
+      properties: {
+        Population: parseNumber(bestRow['Population']),
+        name: bestRow['System Name'] || bestRow['Customer Name'] || '',
+        district: bestRow['District'] || '',
+        customerType: bestRow['Customer Type'] || '',
+        installDate: bestRow['Install Date'] || '',
+        systemName: bestRow['System Name'] || '',
+        designType: bestRow['Design Type'] || '',
+        systemNumber: bestSystemNumber
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [rows[0].lng, rows[0].lat]
+      }
+    };
+  });
+
 
     const geojson = { type: 'FeatureCollection', features };
 
