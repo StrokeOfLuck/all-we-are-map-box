@@ -460,7 +460,7 @@ function addSiteLayers() {
         type: 'Feature',
         properties: {
           Population: parseNumber(bestRow['Population']),
-          name: lookedUpCustomerName || bestRow['Customer Name'] || bestRow['System Name'] || '',
+          name: bestRow['Matched Customer Name'] || bestRow['System Name'] || '',
           district: bestRow['District'] || '',
           customerType: bestRow['Customer Type'] || '',
           installDate: bestRow['Install Date'] || '',
