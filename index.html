@@ -413,24 +413,12 @@ function bindMapInteractions() {
 function addSiteLayers() {
   d3.csv('./Impact_Map_Export%20-%20System%20Bridge%20%28Anchor%20point%29.csv').then(function(data) {
     const grouped = new Map();
-    const customerNameById = new Map();
 
-    // Whole-file lookup table: customer-side ID -> customer name
-    data.forEach(d => {
-      const customerSideId = String(d['Customer ID.2'] || '').trim();
-      const customerName = String(d['Customer Name'] || '').trim();
-
-      if (customerSideId && customerName) {
-        customerNameById.set(customerSideId, customerName);
-      }
-    });
-
-    // Keep your existing grouping logic
     data
-      .filter(d => d.longitude && d.latitude)
+      .filter(d => (d['Matched Longitude'] || d.longitude) && (d['Matched Latitude'] || d.latitude))
       .forEach(d => {
-        const lat = parseNumber(d.latitude);
-        const lng = parseNumber(d.longitude);
+        const lat = parseNumber(d['Matched Latitude'] || d.latitude);
+        const lng = parseNumber(d['Matched Longitude'] || d.longitude);
         const systemNumber = parseNumber(d['Customer System Total']);
 
         const customerId = String(d['Customer ID'] || '').trim();
@@ -453,16 +441,13 @@ function addSiteLayers() {
       const bestRow = rows[0].raw;
       const bestSystemNumber = rows[0].systemNumber;
 
-      const systemSideCustomerId = String(bestRow['Customer ID'] || '').trim();
-      const lookedUpCustomerName = customerNameById.get(systemSideCustomerId);
-
       return {
         type: 'Feature',
         properties: {
-          Population: parseNumber(bestRow['Population']),
+          Population: parseNumber(bestRow['Matched Population'] || bestRow['Population']),
           name: bestRow['Matched Customer Name'] || bestRow['System Name'] || '',
           district: bestRow['District'] || '',
-          customerType: bestRow['Customer Type'] || '',
+          customerType: bestRow['Matched Customer Type'] || bestRow['Customer Type'] || '',
           installDate: bestRow['Install Date'] || '',
           systemName: bestRow['System Name'] || '',
           designType: bestRow['Design Type'] || '',
