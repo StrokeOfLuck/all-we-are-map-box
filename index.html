@@ -559,7 +559,7 @@ map.on('load', () => {
   bindCustomerDropdown();
 });
 
-document.getElementById('styleToggle').addEventListener('click', () => {
+if (!previewMode) document.getElementById('styleToggle').addEventListener('click', () => {
   const center = map.getCenter();
   const zoom = map.getZoom();
   const bearing = map.getBearing();
