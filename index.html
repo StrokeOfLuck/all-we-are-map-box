@@ -16,6 +16,18 @@ body {
   padding: 0;
 }
 
+/* Clean, non-interactive thumbnail used by the portfolio homepage. */
+html.preview-mode #customerSelectorWrap,
+html.preview-mode #customControls,
+html.preview-mode .mapboxgl-ctrl-bottom-right,
+html.preview-mode .mapboxgl-ctrl-bottom-left {
+  display: none !important;
+}
+
+html.preview-mode #map {
+  cursor: default;
+}
+
 #map {
   position: absolute;
   top: 0;
@@ -235,6 +247,11 @@ body {
 <script>
 mapboxgl.accessToken = 'pk.eyJ1Ijoicy1wZXJrIiwiYSI6ImNtbWU1amJyZDBiNjcyc3E0bmZubXVwdm8ifQ.-II8pwN1aLKbed_BQXf0cA';
 
+const previewMode = new URLSearchParams(window.location.search).get('preview') === '1';
+if (previewMode) {
+  document.documentElement.classList.add('preview-mode');
+}
+
 let currentStyle = 'dark';
 let interactionsBound = false;
 let customerLocations = [];
@@ -262,18 +279,23 @@ const map = new mapboxgl.Map({
   container: 'map',
   style: styles.dark,
   center: [32.3, 0.3],
-  zoom: 5,
+  zoom: previewMode ? 4.55 : 5,
+  interactive: !previewMode,
   attributionControl: false
 });
 
-map.addControl(new mapboxgl.NavigationControl({
-  showCompass: false,
-  visualizePitch: false
-}), 'bottom-right');
+if (!previewMode) {
+  map.addControl(new mapboxgl.NavigationControl({
+    showCompass: false,
+    visualizePitch: false
+  }), 'bottom-right');
+}
 
-map.addControl(new mapboxgl.AttributionControl({
-  compact: true
-}), 'bottom-left');
+if (!previewMode) {
+  map.addControl(new mapboxgl.AttributionControl({
+    compact: true
+  }), 'bottom-left');
+}
 
 function populateCustomerDropdown(features) {
   const select = document.getElementById('customerSelector');
@@ -470,7 +492,7 @@ function addSiteLayers() {
       type: 'geojson',
       data: geojson,
       cluster: true,
-      clusterRadius: 150,
+      clusterRadius: previewMode ? 95 : 150,
       clusterMaxZoom: 13,
       clusterProperties: {
         people: ['+', ['get', 'Population']]
@@ -488,13 +510,13 @@ function addSiteLayers() {
         'circle-stroke-width': 0,
         'circle-radius': [
           'interpolate', ['linear'], ['get', 'people'],
-          0, 18,
-          1000, 26,
-          5000, 36,
-          10000, 46,
-          25000, 60,
-          50000, 76,
-          100000, 92
+          0, previewMode ? 12 : 18,
+          1000, previewMode ? 18 : 26,
+          5000, previewMode ? 24 : 36,
+          10000, previewMode ? 30 : 46,
+          25000, previewMode ? 38 : 60,
+          50000, previewMode ? 46 : 76,
+          100000, previewMode ? 54 : 92
         ]
       }
     });
@@ -555,11 +577,13 @@ function addSiteLayers() {
 
 map.on('load', () => {
   addSiteLayers();
-  bindMapInteractions();
-  bindCustomerDropdown();
+  if (!previewMode) {
+    bindMapInteractions();
+    bindCustomerDropdown();
+  }
 });
 
-if (!previewMode) document.getElementById('styleToggle').addEventListener('click', () => {
+if (!previewMode) if (!previewMode) document.getElementById('styleToggle').addEventListener('click', () => {
   const center = map.getCenter();
   const zoom = map.getZoom();
   const bearing = map.getBearing();
