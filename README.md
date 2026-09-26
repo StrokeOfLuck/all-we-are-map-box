@@ -10,25 +10,13 @@ The CSV and GitHub Pages version preserved here should be treated as a portfolio
 
 ## What it does
 
-The map turns installation records into interactive geographic features. Users can:
+An interactive map of All We Are’s solar installations across Uganda. Visitors can search for a customer or site, explore clustered locations, switch map styles, and view installation details.
 
-- browse project sites across Uganda
-- jump to a site with the selector
-- explore clustered locations
-- click sites for installation details
-- switch map styles
+## How I built it
 
-## How it works
+I combined the fields needed for the map from four existing spreadsheets into a read-only master sheet, leaving the organization’s source records unchanged.
 
-The project uses:
-
-- **Mapbox GL JS** for the interactive map, clustering, navigation, and popups
-- **D3** to load and parse the CSV data
-- a bundled CSV export so this archived version remains reproducible
-
-The snapshot data used by the map is stored in:
-
-`Impact_Map_Export - System Bridge (Anchor point).csv`
+The map uses **D3 to load a CSV export** and **Mapbox GL JS for mapping, clustering, navigation, and popups**. At handoff, the data could be updated by replacing the CSV. This repository preserves the last bundled export as a snapshot of the version I worked on.
 
 ## Live snapshot
 
